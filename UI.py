@@ -3,6 +3,10 @@ import tkinter
 from tkinter import messagebox
 import cell
 from elements import *
+from PIL import Image
+# from webbrowser import *
+
+
 
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")
@@ -10,14 +14,27 @@ customtkinter.set_default_color_theme("dark-blue")
 # UI implementation from tutorial
 class GUI:
 
-    def __init__(self, width:int , height:int, title:str):
+    def __init__(self, map:str):
         self.ui = customtkinter.CTk()
         
+        image = Image.open(map)
+        background_image = customtkinter.CTkImage(dark_image=image, size=image.size)
+        self.bg_label = customtkinter.CTkLabel(self.ui, text="", image=background_image)
+        self.bg_label.place(x=0,y=0)
+        width = image.size[0]
+        height = image.size[1]
+        title = map[0:map.index(".")]
+
+        self.lastClickX = 0
+        self.lastClickY = 0
+
         self.label = customtkinter.CTkLabel(master=self.ui, text = title, font = ('Arial', 16))
+        self.label.bind('<Button-1>', self.SaveLastClickPos)
+        self.label.bind('<B1-Motion>', self.Dragging)
         self.label.pack(padx=10, pady=12)
 
-        self.frame = customtkinter.CTkFrame(master=self.ui)
-        self.frame.pack(pady=10, padx=40, fill="both", expand=True)
+        # self.frame = customtkinter.CTkFrame(master=self.ui)
+        # self.frame.pack(pady=10, padx=40, fill="both", expand=True)
 
         self.menubar = tkinter.Menu(self.ui)
 
@@ -48,6 +65,15 @@ class GUI:
         self.ui.protocol("WM_DELETE_WINDOW", self.on_close)
         self.ui.mainloop()
 
+    def SaveLastClickPos(self, event):
+        self.lastClickX = event.x
+        self.lastClickY = event.y
+
+
+    def Dragging(self, widget:customtkinter.CTkLabel, event):
+        x, y = event.x - self.lastClickX + widget.winfo_x(), event.y - self.lastClickY + widget.winfo_y()
+        widget.place(x,y)
+
     def check_cell(self, row, col):
         pass
 
@@ -61,3 +87,4 @@ class GUI:
     def on_close(self):
         if messagebox.askyesno(title="Quit?", message = "You A Loser?"):
             self.ui.destroy()
+
