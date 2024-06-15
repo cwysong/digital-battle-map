@@ -1,15 +1,21 @@
+import customtkinter
 import tkinter
 from tkinter import messagebox
 import cell
 from elements import *
-import customtkinter
+
+customtkinter.set_appearance_mode("dark")
+customtkinter.set_default_color_theme("dark-blue")
 
 # UI implementation from tutorial
 class GUI:
 
     def __init__(self, width:int , height:int, title:str):
-        self.ui = tkinter.Tk()
+        self.ui = customtkinter.CTk()
         
+        self.frame = customtkinter.CTkFrame(master=self.ui)
+        self.frame.pack(pady=20, padx=60, fill="both", expand=True)
+
         self.menubar = tkinter.Menu(self.ui)
 
         self.filemenu = tkinter.Menu(self.menubar, tearoff=0)
@@ -32,10 +38,10 @@ class GUI:
         self.ui.geometry(f"{width}x{height}")
         self.ui.title(title)
 
-        self.label = tkinter.Label(self.ui, text = title, font = ('Arial', 16))
-        self.label.pack(padx=10, pady=10)
+        self.label = customtkinter.CTkLabel(master=self.frame, text = title, font = ('Arial', 16))
+        self.label.pack(padx=10, pady=12)
 
-        self.textbox = tkinter.Text(self.ui, height = 5, font = ('Arial', 16))
+        self.textbox = customtkinter.CTkTextbox(self.ui, height = 5, font = ('Arial', 16))
         self.textbox.bind("<KeyPress>", self.check_effects)
         self.textbox.pack(padx=10, pady=10)
 
@@ -55,4 +61,3 @@ class GUI:
     def on_close(self):
         if messagebox.askyesno(title="Quit?", message = "You A Loser?"):
             self.ui.destroy()
-        
