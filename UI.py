@@ -13,8 +13,11 @@ class GUI:
     def __init__(self, width:int , height:int, title:str):
         self.ui = customtkinter.CTk()
         
+        self.label = customtkinter.CTkLabel(master=self.ui, text = title, font = ('Arial', 16))
+        self.label.pack(padx=10, pady=12)
+
         self.frame = customtkinter.CTkFrame(master=self.ui)
-        self.frame.pack(pady=20, padx=60, fill="both", expand=True)
+        self.frame.pack(pady=10, padx=40, fill="both", expand=True)
 
         self.menubar = tkinter.Menu(self.ui)
 
@@ -37,9 +40,6 @@ class GUI:
 
         self.ui.geometry(f"{width}x{height}")
         self.ui.title(title)
-
-        self.label = customtkinter.CTkLabel(master=self.frame, text = title, font = ('Arial', 16))
-        self.label.pack(padx=10, pady=12)
 
         self.textbox = customtkinter.CTkTextbox(self.ui, height = 5, font = ('Arial', 16))
         self.textbox.bind("<KeyPress>", self.check_effects)
