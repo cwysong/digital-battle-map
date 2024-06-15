@@ -4,7 +4,6 @@ from tkinter import messagebox
 import cell
 from elements import *
 from PIL import Image
-# from webbrowser import *
 
 
 
