@@ -1,4 +1,4 @@
-from UI import GUI
+from ui import GUI
 
 class run():
     ui = GUI()
