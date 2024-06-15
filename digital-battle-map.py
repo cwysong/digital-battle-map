@@ -1,6 +1,4 @@
-import tkinter as tk
+from UI import GUI
 
-# UI implementation from tutorial
-class GUI:
-    def __init__(self) -> None:
-        pass
+class run():
+    ui = GUI()
