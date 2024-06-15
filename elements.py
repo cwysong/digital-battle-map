@@ -28,7 +28,7 @@ class status_effect:
 
 
     def define(self, effect:str) -> str:
-        definition = self.effects[effect]
+        return self.effects[effect]
 
 
 class spell_range:

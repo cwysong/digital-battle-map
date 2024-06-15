@@ -1,7 +1,9 @@
-from ui import GUI
+from ui import *
+
 
 class run():
-    ui = GUI()
-    ui
+    
+    def __init__(self) -> None:
+        self.gui = GUI()
 
 run()
