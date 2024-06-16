@@ -16,7 +16,7 @@ class dnd_battle_map(tk.Frame):
         self.entities:dict[str, entity] = dict()
         self.create_widgets()
         self.setup_scroll_bindings()
-        self.marks:dict[str,list] = dict()
+        self.marks:list = []
         self.selected:entity = None
         self.dupes:dict[str,int] = dict()
 
@@ -63,32 +63,38 @@ class dnd_battle_map(tk.Frame):
         if self.selected != None:
             x = self.canvas.canvasx(event.x)
             y = self.canvas.canvasy(event.y)
-            cell_left = round(x/CELL_SIZE)*CELL_SIZE
+            cell_left = (x//CELL_SIZE)*CELL_SIZE
             cell_right = cell_left+CELL_SIZE
-            cell_up = round(y/CELL_SIZE)*CELL_SIZE
+            cell_up = (y//CELL_SIZE)*CELL_SIZE
             cell_down = cell_up+CELL_SIZE
-            count = len(self.marks)
-            self.marks[count] = [cell_left, cell_up, cell_right, cell_down]
-            if count < int(self.selected.speed/5):
-                self.canvas.create_rectangle(cell_left, cell_up, cell_right, cell_down, outline='white')
-            else:
-                self.canvas.create_rectangle(cell_left, cell_up, cell_right, cell_down, outline='red')
+            try:
+                ind = self.marks.index([cell_left,cell_up,cell_right,cell_down])
+                self.marks.pop(ind)
+                self.canvas.create_rectangle(cell_left, cell_up, cell_right, cell_down, outline='black')
+            except:
+                self.marks.append([cell_left, cell_up, cell_right, cell_down])
+                if len(self.marks)-1 < int(self.selected.speed/5):
+                    self.canvas.create_rectangle(cell_left, cell_up, cell_right, cell_down, outline='white')
+                elif len(self.marks)-1 < int(self.selected.speed/5)*2:
+                    self.canvas.create_rectangle(cell_left, cell_up, cell_right, cell_down, outline='orange')
+                elif len(self.marks)-1 < int(self.selected.speed/5)*4:
+                    self.canvas.create_rectangle(cell_left, cell_up, cell_right, cell_down, outline='red')
 
     def middle_click(self, event):
         x = self.canvas.canvasx(event.x)
         y = self.canvas.canvasy(event.y)
-        cell_left = round(x/CELL_SIZE)*CELL_SIZE
+        cell_left = (x//CELL_SIZE)*CELL_SIZE
         cell_right = cell_left+CELL_SIZE
-        cell_up = round(y/CELL_SIZE)*CELL_SIZE
+        cell_up = (y//CELL_SIZE)*CELL_SIZE
         cell_down = cell_up+CELL_SIZE
         self.canvas.create_rectangle(cell_left, cell_up, cell_right, cell_down, outline='black')
     
     def right_click(self, event):
         x = self.canvas.canvasx(event.x)
         y = self.canvas.canvasy(event.y)
-        cell_left = round(x/CELL_SIZE)*CELL_SIZE
+        cell_left = (x//CELL_SIZE)*CELL_SIZE
         cell_right = cell_left+CELL_SIZE
-        cell_up = round(y/CELL_SIZE)*CELL_SIZE
+        cell_up = (y//CELL_SIZE)*CELL_SIZE
         cell_down = cell_up+CELL_SIZE
         for key in self.entities.keys():
             if self.entities[key].location[0] == cell_left and self.entities[key].location[1] == cell_up:
@@ -98,6 +104,7 @@ class dnd_battle_map(tk.Frame):
                 elif self.entities[key] == self.selected:
                     self.selected = None
                     self.canvas.create_rectangle(cell_left, cell_up, cell_right, cell_down, outline='red')
+                    self.clear_marks()
                 break
             elif self.entities[key] == self.selected:
                 prev_left = self.entities[key].location[0]
@@ -118,12 +125,12 @@ class dnd_battle_map(tk.Frame):
 
     def clear_marks(self):
         for mark in self.marks:
-            cell_left = self.marks[mark][0]
-            cell_up = self.marks[mark][1]
-            cell_right = self.marks[mark][2]
-            cell_down = self.marks[mark][3]
+            cell_left = mark[0]
+            cell_up = mark[1]
+            cell_right = mark[2]
+            cell_down = mark[3]
             self.canvas.create_rectangle(cell_left, cell_up, cell_right, cell_down, outline='black')
-        self.marks:dict = dict()
+        self.marks = []
 
     def setup_scroll_bindings(self):
         self.canvas.bind("<KeyPress-w>", self.scroll_up)
@@ -156,6 +163,7 @@ class dnd_battle_map(tk.Frame):
         self.canvas.create_rectangle(0,0,CELL_SIZE, CELL_SIZE, outline='red')
 
 def main():
+
     root = tk.Tk()
     root.title("DND Battle Map")
     app = dnd_battle_map(master=root)
