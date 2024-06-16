@@ -6,6 +6,9 @@ class entity():
         self.status:str = None
         self.name:str = None
         self.speed:int = 30
+        self.location:tuple= (0,0)
+        self.sprite= None
+        self.selected = False
 
 
 class monster(entity):
