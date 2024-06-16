@@ -9,18 +9,55 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
+            background-color: #f0f0f0;
         }
         #canvasContainer {
             position: relative;
             overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
         #canvas {
             border: 1px solid black;
             cursor: crosshair;
+            image-rendering: pixelated; /* Maintain pixelated look */
+        }
+        .menu-bar {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000; /* Ensure it's above canvas */
+            display: flex;
+            justify-content: space-between;
+        }
+        .menu-bar a {
+            color: white;
+            text-decoration: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .menu-bar a:hover {
+            background-color: #555;
         }
     </style>
 </head>
 <body>
+    <div class="menu-bar">
+        <div>
+            <a href="#" id="addEntity">Add Entity</a>
+            <a href="#" id="clearMarks">Clear Marks</a>
+        </div>
+        <div>
+            <a href="#" id="closeApp">Close</a>
+        </div>
+    </div>
+
     <div id="canvasContainer">
         <canvas id="canvas"></canvas>
     </div>
@@ -28,7 +65,7 @@
     <script>
         // Constants for grid size and scrolling amount
         const CELL_SIZE = 60;  // Size of each cell in pixels
-        const SCROLL_AMOUNT = 20;  // Amount to scroll on each key press
+        const SCROLL_AMOUNT = 60;  // Amount to scroll on each key press (adjusted for VS Code scale)
 
         // Variables for canvas and context
         let canvas = document.getElementById('canvas');
@@ -69,12 +106,10 @@
             let cellX = Math.floor(mouseX / CELL_SIZE) * CELL_SIZE;
             let cellY = Math.floor(mouseY / CELL_SIZE) * CELL_SIZE;
 
-            // Example: Toggle marking cells on left click
+            // Toggle mark on left click, select entity on right click
             if (event.button === 0) {
                 toggleMark(cellX, cellY);
-            }
-            // Example: Select entity on right click
-            else if (event.button === 2) {
+            } else if (event.button === 2) {
                 selectEntity(cellX, cellY);
             }
         }
@@ -141,16 +176,7 @@
             }
         }
 
-        // Initialize canvas and set up event listeners
-        function init() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            drawGrid();
-            canvas.addEventListener('mousedown', handleClick);
-            window.addEventListener('keydown', handleKeyPress);
-        }
-
-        // Example: Function to add a new entity
+        // Function to add a new entity
         function addEntity(name, sprite, x, y) {
             let entity = {
                 name: name,
@@ -160,6 +186,40 @@
             entity.photo.src = sprite;
             entities[name] = entity;
             redrawCanvas();
+        }
+
+        // Function to clear all marks
+        function clearMarks() {
+            marks = [];
+            redrawCanvas();
+        }
+
+        // Function to close the application
+        function closeApp() {
+            if (confirm("Are you sure you want to close?")) {
+                window.close();
+            }
+        }
+
+        // Initialize canvas and set up event listeners
+        function init() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            drawGrid();
+            canvas.addEventListener('mousedown', handleClick);
+            window.addEventListener('keydown', handleKeyPress);
+
+            // Menu bar event listeners
+            document.getElementById('addEntity').addEventListener('click', function() {
+                // Example: Add entity at specific location
+                addEntity('kobold', 'kobold.png', 120, 120);
+            });
+            document.getElementById('clearMarks').addEventListener('click', function() {
+                clearMarks();
+            });
+            document.getElementById('closeApp').addEventListener('click', function() {
+                closeApp();
+            });
         }
 
         // Call init function when the page is loaded
