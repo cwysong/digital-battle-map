@@ -12,9 +12,11 @@
         }
         #canvasContainer {
             position: relative;
+            overflow: hidden;
         }
         #canvas {
             border: 1px solid black;
+            cursor: crosshair;
         }
     </style>
 </head>
@@ -24,18 +26,29 @@
     </div>
     
     <script>
-        // JavaScript code goes here
-        const CELL_SIZE = 60; // Size of each cell in pixels
+        // Constants for grid size and scrolling amount
+        const CELL_SIZE = 60;  // Size of each cell in pixels
+        const SCROLL_AMOUNT = 20;  // Amount to scroll on each key press
+
+        // Variables for canvas and context
         let canvas = document.getElementById('canvas');
         let ctx = canvas.getContext('2d');
-        let marks = [];
+        let entities = {};  // Dictionary to store entities
+        let selectedEntity = null;  // Variable to store currently selected entity
+        let marks = [];  // Array to store marked cells
 
-        canvas.width = window.innerWidth; // Adjust canvas size to fit window
-        canvas.height = window.innerHeight;
+        // Load background image
+        let background = new Image();
+        background.src = 'cave.jpg';  // Replace with your image file path
 
-        // Function to draw grid lines
+        // Function to draw the grid
         function drawGrid() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+            
+            // Draw grid lines
             ctx.beginPath();
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
             for (let x = 0; x <= canvas.width; x += CELL_SIZE) {
                 ctx.moveTo(x, 0);
                 ctx.lineTo(x, canvas.height);
@@ -44,7 +57,6 @@
                 ctx.moveTo(0, y);
                 ctx.lineTo(canvas.width, y);
             }
-            ctx.strokeStyle = 'black';
             ctx.stroke();
         }
 
@@ -57,19 +69,97 @@
             let cellX = Math.floor(mouseX / CELL_SIZE) * CELL_SIZE;
             let cellY = Math.floor(mouseY / CELL_SIZE) * CELL_SIZE;
 
-            // Example: Draw rectangle on click
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawGrid();
-            ctx.beginPath();
-            ctx.rect(cellX, cellY, CELL_SIZE, CELL_SIZE);
-            ctx.strokeStyle = 'blue';
-            ctx.stroke();
+            // Example: Toggle marking cells on left click
+            if (event.button === 0) {
+                toggleMark(cellX, cellY);
+            }
+            // Example: Select entity on right click
+            else if (event.button === 2) {
+                selectEntity(cellX, cellY);
+            }
         }
 
-        // Initialize canvas and draw initial grid
-        function init() {
+        // Function to toggle mark on a cell
+        function toggleMark(cellX, cellY) {
+            let index = marks.findIndex(mark => mark[0] === cellX && mark[1] === cellY);
+            if (index === -1) {
+                marks.push([cellX, cellY]);
+            } else {
+                marks.splice(index, 1);
+            }
+            redrawCanvas();
+        }
+
+        // Function to select an entity
+        function selectEntity(cellX, cellY) {
+            for (let key in entities) {
+                let entity = entities[key];
+                if (entity.location[0] === cellX && entity.location[1] === cellY) {
+                    if (selectedEntity === entity) {
+                        selectedEntity = null;
+                    } else {
+                        selectedEntity = entity;
+                    }
+                    redrawCanvas();
+                    return;
+                }
+            }
+        }
+
+        // Function to redraw canvas
+        function redrawCanvas() {
             drawGrid();
-            canvas.addEventListener('click', handleClick);
+            marks.forEach(mark => {
+                ctx.strokeStyle = 'white';
+                ctx.strokeRect(mark[0], mark[1], CELL_SIZE, CELL_SIZE);
+            });
+            for (let key in entities) {
+                let entity = entities[key];
+                ctx.drawImage(entity.photo, entity.location[0], entity.location[1], CELL_SIZE, CELL_SIZE);
+                if (selectedEntity === entity) {
+                    ctx.strokeStyle = 'red';
+                    ctx.strokeRect(entity.location[0], entity.location[1], CELL_SIZE, CELL_SIZE);
+                }
+            }
+        }
+
+        // Function to handle key press events (scrolling)
+        function handleKeyPress(event) {
+            switch (event.key) {
+                case 'w':
+                    canvas.scrollBy(0, -SCROLL_AMOUNT);
+                    break;
+                case 'a':
+                    canvas.scrollBy(-SCROLL_AMOUNT, 0);
+                    break;
+                case 's':
+                    canvas.scrollBy(0, SCROLL_AMOUNT);
+                    break;
+                case 'd':
+                    canvas.scrollBy(SCROLL_AMOUNT, 0);
+                    break;
+            }
+        }
+
+        // Initialize canvas and set up event listeners
+        function init() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            drawGrid();
+            canvas.addEventListener('mousedown', handleClick);
+            window.addEventListener('keydown', handleKeyPress);
+        }
+
+        // Example: Function to add a new entity
+        function addEntity(name, sprite, x, y) {
+            let entity = {
+                name: name,
+                photo: new Image(),
+                location: [x, y]
+            };
+            entity.photo.src = sprite;
+            entities[name] = entity;
+            redrawCanvas();
         }
 
         // Call init function when the page is loaded
