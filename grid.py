@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import PhotoImage, messagebox
 from PIL import Image, ImageTk
 from elements import *
 
@@ -16,6 +16,8 @@ class dnd_battle_map(tk.Frame):
         self.entities:dict[str, entity] = dict()
         self.create_widgets()
         self.setup_scroll_bindings()
+        self.marks:dict[str,list] = dict()
+        self.selected:entity = None
 
     def create_widgets(self):
         self.background_image = Image.open("cave.jpg")  # Replace with your image file path
@@ -57,13 +59,19 @@ class dnd_battle_map(tk.Frame):
             self.master.destroy()
 
     def left_click(self, event):
-        x = self.canvas.canvasx(event.x)
-        y = self.canvas.canvasy(event.y)
-        cell_left = round(x/CELL_SIZE)*CELL_SIZE
-        cell_right = cell_left+CELL_SIZE
-        cell_up = round(y/CELL_SIZE)*CELL_SIZE
-        cell_down = cell_up+CELL_SIZE
-        self.canvas.create_rectangle(cell_left, cell_up, cell_right, cell_down, outline='white')
+        if self.selected != None:
+            x = self.canvas.canvasx(event.x)
+            y = self.canvas.canvasy(event.y)
+            cell_left = round(x/CELL_SIZE)*CELL_SIZE
+            cell_right = cell_left+CELL_SIZE
+            cell_up = round(y/CELL_SIZE)*CELL_SIZE
+            cell_down = cell_up+CELL_SIZE
+            count = len(self.marks)
+            self.marks[count] = [cell_left, cell_up, cell_right, cell_down]
+            if count < int(self.selected.speed/5):
+                self.canvas.create_rectangle(cell_left, cell_up, cell_right, cell_down, outline='white')
+            else:
+                self.canvas.create_rectangle(cell_left, cell_up, cell_right, cell_down, outline='red')
 
     def middle_click(self, event):
         x = self.canvas.canvasx(event.x)
@@ -83,19 +91,37 @@ class dnd_battle_map(tk.Frame):
         cell_down = cell_up+CELL_SIZE
         for key in self.entities.keys():
             if self.entities[key].location[0] == cell_left and self.entities[key].location[1] == cell_up:
-                if self.entities[key].selected == False:
-                    self.canvas.create_oval(cell_left, cell_up, cell_right, cell_down, outline='white')
-                    self.entities[key].selected = True
-                elif self.entities[key].selected == True:
-                    self.entities[key].selected = False
-                    self.canvas.create_oval(cell_left, cell_up, cell_right, cell_down, outline='green')
-                break
-            elif self.entities[key].selected == True:
-                # Remove previous location
-                self.canvas.create_oval(cell_left, cell_up, cell_right, cell_down, fill='green')
-                self.entities[key].selected = False
+                if self.entities[key] != self.selected:
+                    self.canvas.create_rectangle(cell_left, cell_up, cell_right, cell_down, outline='white')
+                    self.selected = self.entities[key]
+                elif self.entities[key] == self.selected:
+                    self.selected = None
+                    self.canvas.create_rectangle(cell_left, cell_up, cell_right, cell_down, outline='red')
+            elif self.entities[key] == self.selected:
+                prev_left = self.entities[key].location[0]
+                prev_up = self.entities[key].location[1]
+                prev_right = prev_left+CELL_SIZE
+                prev_down = prev_up+CELL_SIZE
+                self.entities[key].prev_id = self.entities[key].cur_id
+                self.clear_marks()
+                # Remove previous sprite
+                self.canvas.create_rectangle(prev_left,prev_up,prev_right,prev_down,outline='black')
+                self.canvas.delete(self.entities[key].prev_id)
+                self.entities[key].cur_id = self.canvas.create_image(cell_left,cell_up, image = self.entities[key].photo, anchor = tk.NW)
+                self.canvas.create_rectangle(cell_left,cell_up,cell_right,cell_down, outline='red')
+                self.selected = None
                 new_location = tuple([cell_left, cell_up])
                 self.entities[key].location = new_location
+            break
+
+    def clear_marks(self):
+        for mark in self.marks:
+            cell_left = self.marks[mark][0]
+            cell_up = self.marks[mark][1]
+            cell_right = self.marks[mark][2]
+            cell_down = self.marks[mark][3]
+            self.canvas.create_rectangle(cell_left, cell_up, cell_right, cell_down, outline='black')
+        self.marks:dict = dict()
 
     def setup_scroll_bindings(self):
         self.canvas.bind("<KeyPress-w>", self.scroll_up)
@@ -118,9 +144,10 @@ class dnd_battle_map(tk.Frame):
         self.canvas.xview_scroll(1, "units")
         
     def add_entity(self):
-        new_entity:entity = entity()
-        self.entities.setdefault("new", new_entity)
-        self.canvas.create_oval(0, 0, CELL_SIZE, CELL_SIZE, fill='green')
+        new_entity:entity = entity(name = "kobold", sprite = "kobold.png")
+        self.entities[new_entity.name] = new_entity
+        new_entity.cur_id = self.canvas.create_image(0,0, image = new_entity.photo, anchor = tk.NW)
+        self.canvas.create_rectangle(0,0,CELL_SIZE, CELL_SIZE, outline='red')
 
 def main():
     root = tk.Tk()

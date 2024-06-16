@@ -113,5 +113,3 @@ class GUI:
     def on_close(self):
         if messagebox.askyesno(title="Quit?", message = "You A Loser?"):
             self.ui.destroy()
-
-

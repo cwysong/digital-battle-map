@@ -1,14 +1,16 @@
-
+from tkinter import PhotoImage
 
 class entity():
     
-    def __init__(self) -> None:
+    def __init__(self, name = "None", speed = 30, location = (0,0), sprite = None) -> None:
         self.status:str = None
-        self.name:str = None
-        self.speed:int = 30
-        self.location:tuple= (0,0)
-        self.sprite= None
-        self.selected = False
+        self.name:str = name
+        self.speed:int = speed
+        self.location:tuple= location
+        self.sprite = sprite
+        self.photo = PhotoImage(file=self.sprite)
+        self.prev_id = None
+        self.cur_id = None
 
 
 class monster(entity):
