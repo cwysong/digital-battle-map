@@ -18,6 +18,7 @@ class dnd_battle_map(tk.Frame):
         self.setup_scroll_bindings()
         self.marks:dict[str,list] = dict()
         self.selected:entity = None
+        self.dupes:dict[str,int] = dict()
 
     def create_widgets(self):
         self.background_image = Image.open("cave.jpg")  # Replace with your image file path
@@ -91,12 +92,13 @@ class dnd_battle_map(tk.Frame):
         cell_down = cell_up+CELL_SIZE
         for key in self.entities.keys():
             if self.entities[key].location[0] == cell_left and self.entities[key].location[1] == cell_up:
-                if self.entities[key] != self.selected:
+                if self.selected is None:
                     self.canvas.create_rectangle(cell_left, cell_up, cell_right, cell_down, outline='white')
                     self.selected = self.entities[key]
                 elif self.entities[key] == self.selected:
                     self.selected = None
                     self.canvas.create_rectangle(cell_left, cell_up, cell_right, cell_down, outline='red')
+                break
             elif self.entities[key] == self.selected:
                 prev_left = self.entities[key].location[0]
                 prev_up = self.entities[key].location[1]
@@ -112,7 +114,7 @@ class dnd_battle_map(tk.Frame):
                 self.selected = None
                 new_location = tuple([cell_left, cell_up])
                 self.entities[key].location = new_location
-            break
+                break
 
     def clear_marks(self):
         for mark in self.marks:
@@ -145,7 +147,11 @@ class dnd_battle_map(tk.Frame):
         
     def add_entity(self):
         new_entity:entity = entity(name = "kobold", sprite = "kobold.png")
-        self.entities[new_entity.name] = new_entity
+        try: 
+            self.dupes[new_entity.name] = self.dupes[new_entity.name]+1
+        except:
+            self.dupes[new_entity.name] = 1
+        self.entities[new_entity.name+str(self.dupes[new_entity.name])] = new_entity
         new_entity.cur_id = self.canvas.create_image(0,0, image = new_entity.photo, anchor = tk.NW)
         self.canvas.create_rectangle(0,0,CELL_SIZE, CELL_SIZE, outline='red')
 
