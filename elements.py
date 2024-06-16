@@ -13,18 +13,6 @@ class entity():
         self.cur_id = None
 
 
-class monster(entity):
-    
-    def __init__(self) -> None:
-        super().__init__()
-
-
-class player(entity):
-    
-    def __init__(self) -> None:
-        super().__init__()
-
-
 class status_effect:
     
     def __init__(self) -> None:
