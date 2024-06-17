@@ -84,9 +84,19 @@
                 this.location = location || { x: 0, y: 0 };
                 this.sprite = sprite || "kobold.png";
                 this.image = new Image();
+                this.image.onload = () => {
+                    // Once image is loaded, trigger canvas redraw
+                    if (this.onloadCallback) {
+                        this.onloadCallback();
+                    }
+                };
                 this.image.src = this.sprite;
                 this.prevId = null;
                 this.curId = null;
+            }
+
+            onImageLoad(callback) {
+                this.onloadCallback = callback;
             }
         }
 
@@ -112,7 +122,7 @@
                 this.canvas.width = window.innerWidth;
                 this.canvas.height = window.innerHeight;
                 this.backgroundImage = new Image();
-                this.backgroundImage.src = "cave.jpg";
+                this.backgroundImage.src = "map.jpg";
                 this.backgroundImage.onload = () => {
                     this.canvas.width = this.backgroundImage.width;
                     this.canvas.height = this.backgroundImage.height;
@@ -183,8 +193,8 @@
                             this.selected = entity;
                             this.drawMark(x, y, 'white');
                         } else if (this.selected === entity) {
+                            this.drawMark(entity.location.x, entity.location.y, 'black'); // Clear previous mark
                             this.selected = null;
-                            this.drawMark(x, y, 'red');
                             this.clearMarks();
                         }
                         return;
@@ -194,9 +204,10 @@
                     const prevX = this.selected.location.x;
                     const prevY = this.selected.location.y;
                     this.selected.location = { x, y };
+                    // this.selected = null
                     this.redrawCanvas();
                     this.clearMarks();
-                    this.drawMark(x, y, 'red');
+                    this.drawMark(x, y, 'white');
                 }
             }
 
@@ -229,12 +240,13 @@
             }
 
             addEntity() {
-                const newEntity = new Entity("kobold", 30, { x: 0, y: 0 }, "kobold.png");
-                const nameKey = `${newEntity.name}${this.dupes[newEntity.name] || ''}`;
-                this.dupes[newEntity.name] = (this.dupes[newEntity.name] || 0) + 1;
-                this.entities[nameKey] = newEntity;
-                this.redrawCanvas();
-                this.drawMark(0, 0, 'red');
+                const newEntity = new Entity("kobold", 30, { x: CELL_SIZE, y: CELL_SIZE }, "kobold.png");
+                newEntity.onImageLoad(() => {
+                    const nameKey = `${newEntity.name}${this.dupes[newEntity.name] || ''}`;
+                    this.dupes[newEntity.name] = (this.dupes[newEntity.name] || 0) + 1;
+                    this.entities[nameKey] = newEntity;
+                    this.redrawCanvas(); // Ensure canvas is redrawn after entity image loads
+                });
             }
 
             setupScrollBindings() {
@@ -258,7 +270,7 @@
 
             closeFile() {
                 if (window.confirm("You A Loser?")) {
-                    window.close()
+                    window.open('', '_self').close(); // Close the current tab or window
                 }
             }
         }

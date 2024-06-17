@@ -2,13 +2,13 @@ from tkinter import PhotoImage
 
 class entity():
     
-    def __init__(self, name = "None", speed = 30, location = (0,0), sprite = None) -> None:
+    def __init__(self, name = "None", speed = 30, location = (0,0), sprite = None, size=60) -> None:
         self.status:str = None
         self.name:str = name
         self.speed:int = speed
         self.location:tuple= location
         self.sprite = sprite
-        self.photo = PhotoImage(file=self.sprite)
+        self.photo = PhotoImage(file=self.sprite, width = size, height=size)
         self.prev_id = None
         self.cur_id = None
 

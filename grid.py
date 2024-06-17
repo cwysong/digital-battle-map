@@ -21,7 +21,7 @@ class dnd_battle_map(tk.Frame):
         self.dupes:dict[str,int] = dict()
 
     def create_widgets(self):
-        self.background_image = Image.open("cave.jpg")  # Replace with your image file path
+        self.background_image = Image.open("map.jpg")  # Replace with your image file path
         self.background_photo = ImageTk.PhotoImage(self.background_image)
 
         # Create a canvas widget
@@ -153,7 +153,7 @@ class dnd_battle_map(tk.Frame):
         self.canvas.xview_scroll(1, "units")
         
     def add_entity(self):
-        new_entity:entity = entity(name = "kobold", sprite = "kobold.png")
+        new_entity:entity = entity(name = "kobold", sprite = "kobold.png", size=CELL_SIZE)
         try: 
             self.dupes[new_entity.name] = self.dupes[new_entity.name]+1
         except:
