@@ -102,6 +102,8 @@
                 
                 document.getElementById('addEntityBtn').addEventListener('click', this.addEntity.bind(this));
                 this.canvas.addEventListener('mousedown', this.handleMouseDown.bind(this));
+                const closeMenuItem = document.querySelector('#menuBar .dropdown-content a[href="#"]');
+                closeMenuItem.addEventListener('click', this.closeFile.bind(this));
             }
 
             initCanvas() {
@@ -252,6 +254,12 @@
                             break;
                     }
                 });
+            }
+
+            closeFile() {
+                if (window.confirm("You A Loser?")) {
+                    window.close()
+                }
             }
         }
 
